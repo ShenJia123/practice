@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: pdf-analysis
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+      enabled: true
+  thymeleaf:
+    cache: false
+server:
+  port: 8099
+target: D:\
