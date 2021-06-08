@@ -8,6 +8,14 @@ spring:
       enabled: true
   thymeleaf:
     cache: false
+  redis:
+    port: 16379
+    host: 192.227.177.107
+    password: gzzgdnz
+    database: 2
 server:
   port: 8099
-target: D:\
+logging:
+  level:
+    com.test: trace
+target: D://
