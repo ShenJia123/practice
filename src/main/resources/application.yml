@@ -1,6 +1,11 @@
 spring:
   application:
     name: pdf-analysis
+  datasource:
+    url:
+    password:
+    username:
+    driver-class-name:
   servlet:
     multipart:
       max-file-size: 20MB
