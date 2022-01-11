@@ -1,26 +1,12 @@
 spring:
   application:
     name: pdf-analysis
-  datasource:
-    url:
-    password:
-    username:
-    driver-class-name:
-  servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 100MB
-      enabled: true
+  profiles:
+    active: dev
   thymeleaf:
     cache: false
-  redis:
-    port: 16379
-    host: 192.227.177.107
-    password: gzzgdnz
-    database: 2
 server:
   port: 8099
 logging:
   level:
     com.test: trace
-target: /root/transfer

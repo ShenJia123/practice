@@ -50,76 +50,37 @@ public class PdfController {
             PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(fileUrl));
             document.open();
             Image image = Image.getInstance(multipartFile.getBytes());
-            int percent = getPercent(image.getHeight(), image.getWidth());
+            int percent = getPercent2(image.getHeight(), image.getWidth());
             image.setAlignment(Image.MIDDLE);
             image.scalePercent(percent);
             document.add(image);
             document.close();
+            pdfWriter.flush();
             pdfWriter.close();
-            if (!redisTemplate.hasKey(id)) {
-                log.info("{}", fileUrl);
-                redisTemplate.opsForValue().set(id, fileUrl, 1L);
-            } else {
-                redisTemplate.opsForValue().append(id, "," + fileUrl);
-            }
+            log.info("{}", fileUrl);
+            redisTemplate.opsForValue().set(id, fileUrl, 1L);
         } catch (IOException | DocumentException e) {
             e.printStackTrace();
         }
         return R.ok();
     }
 
-    @GetMapping("toZip")
+    @GetMapping("toPdf")
     public void toZip(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
         String fileUrl = redisTemplate.opsForValue().get(id);
-        String fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".zip";
+        log.info("{}", fileUrl);
+        String fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".pdf";
         log.info("文件名称：{}", fileName);
-        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target + fileName));
-        byte[] buffer = new byte[1024];
-        List<String> files = Arrays.asList(fileUrl.trim().split(","));
-        for (String url : files) {
-            FileInputStream fis = new FileInputStream(url);
-            zos.putNextEntry(new ZipEntry(url));
-            int len = 0;
-            while ((len = fis.read(buffer)) != -1) {
-                zos.write(buffer, 0, len);
-            }
-            zos.closeEntry();
-            fis.close();
-        }
-        // 设置文件名
-        zos.close();
-        response.setHeader("content-type", "application/octet-stream");
-        response.setContentType("application/octet-stream");
+        FileInputStream fis = new FileInputStream(new File(fileUrl));
+        byte[] buffer = new byte[fis.available()];
+        fis.close();
+        response.reset();
+        response.setHeader("content-type", "application/pdf");
         response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8"));
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        try {
-            fis = new FileInputStream(target + fileName);
-            bis = new BufferedInputStream(fis);
-            OutputStream os = response.getOutputStream();
-            int i = bis.read(buffer);
-            while (i != -1) {
-                os.write(buffer, 0, i);
-                i = bis.read(buffer);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (bis != null) {
-                try {
-                    bis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        OutputStream out = response.getOutputStream();
+        out.write(buffer);
+        out.flush();
+        out.close();
     }
 
     /**
