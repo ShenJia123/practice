@@ -23,6 +23,7 @@
         </blockquote>
     </div>
     <div>
+        <input type="text" class="layui-hide" id="fileUrl">
         <button type="button" id="download" class="layui-btn layui-hide">下载文件</button>
     </div>
 </div>
@@ -36,18 +37,13 @@
         var layer = layui.layer,
             upload = layui.upload,
             $ = layui.jquery,
-            id,
             form = layui.form;
 
-        id = guid();
 
         upload.render({
             elem: '#upload',
             url: '/pdf/imgTransferPdf',
             multiple: true,
-            data: {
-                id: id
-            },
             field: 'file',
             accept: 'file',
             exts: 'png|jpg|jpeg',
@@ -58,6 +54,7 @@
             },
             done: function (res) {
                 if (res.code === 200) {
+                    $("#fileUrl").val(res.data);
                     $("#download").removeClass('layui-hide')
                     layer.msg("上传成功");
                 }
@@ -65,16 +62,15 @@
         })
 
         $("#download").on('click', function () {
-            window.location.href = '/pdf/toPdf?id=' + id;
+            var curWwwPath = window.document.location.href;
+            var pathName = window.document.location.pathname;
+            var pos = curWwwPath.indexOf(pathName);
+            var localhostPath = curWwwPath.substring(0, pos);
+            var projectName = pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+            var fileUrl = $("#fileUrl").val()
+            var url = localhostPath + projectName + '/pdf/toPdf?fileUrl=' + fileUrl;
+            window.open(url);
         })
-
-        function guid() {
-            return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0,
-                    v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
     });
 </script>
 </body>

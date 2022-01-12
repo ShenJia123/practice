@@ -41,12 +41,12 @@ public class PdfController {
     private RedisTemplate<String, String> redisTemplate;
 
     @PostMapping("imgTransferPdf")
-    public R imgTransferPdf(@RequestParam("file") MultipartFile multipartFile,
-                            @RequestParam("id") String id) {
+    public R imgTransferPdf(@RequestParam("file") MultipartFile multipartFile) {
         Document document = new Document(PageSize.A4);
+        String fileUrl = "";
         try {
             String fileName = UUID.randomUUID().toString().replaceAll("-", "");
-            String fileUrl = target + fileName + ".pdf";
+            fileUrl = target + fileName + ".pdf";
             PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(fileUrl));
             document.open();
             Image image = Image.getInstance(multipartFile.getBytes());
@@ -58,29 +58,29 @@ public class PdfController {
             pdfWriter.flush();
             pdfWriter.close();
             log.info("{}", fileUrl);
-            redisTemplate.opsForValue().set(id, fileUrl, 1L);
         } catch (IOException | DocumentException e) {
             e.printStackTrace();
         }
-        return R.ok();
+        return R.ok(fileUrl);
     }
 
     @GetMapping("toPdf")
-    public void toZip(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
-        String fileUrl = redisTemplate.opsForValue().get(id);
+    public void toZip(@RequestParam("fileUrl") String fileUrl, HttpServletResponse response) throws IOException {
         log.info("{}", fileUrl);
         String fileName = UUID.randomUUID().toString().replaceAll("-", "") + ".pdf";
         log.info("文件名称：{}", fileName);
         FileInputStream fis = new FileInputStream(new File(fileUrl));
-        byte[] buffer = new byte[fis.available()];
-        fis.close();
-        response.reset();
-        response.setHeader("content-type", "application/pdf");
-        response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8"));
         OutputStream out = response.getOutputStream();
-        out.write(buffer);
-        out.flush();
+        byte[] buffer = new byte[1000];
+        int len;
+        while ((len = fis.read(buffer)) > 0) {
+            out.write(buffer, 0, len);
+        }
+        response.setContentType("application/x-msdownload");
+        response.addHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(fileName, "UTF-8"));
+        fis.close();
         out.close();
+        out.flush();
     }
 
     /**

@@ -16,4 +16,4 @@ server:
 logging:
   level:
     com.test: trace
-target: /Users/shenjia/Sj\
+target: /root/transfer/
