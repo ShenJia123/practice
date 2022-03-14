@@ -11,6 +11,10 @@ spring:
     host: 192.227.177.107
     password: gzzgdnz
     database: 2
+  freemarker:
+    charset: UTF-8
+    settings:
+      url
 server:
   port: 8099
 logging:
