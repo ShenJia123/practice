@@ -83,8 +83,8 @@
         <!-- 支持css样式渲染 -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-pdf-itext5</artifactId>
-            <version>9.0.3</version>
+            <artifactId>flying-saucer-pdf</artifactId>
+            <version>9.1.18</version>
         </dependency>
     </dependencies>
 

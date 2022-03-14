@@ -5,6 +5,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -25,9 +27,10 @@ public class HtmlGenerator {
      * @return htmlStr
      * @throws Exception
      */
-    public static String generate(String template, Map<String, Object> variables)
+    public static String generate(String template, Map<String, Object> variables, String outputFile)
             throws Exception {
         Configuration config = FreemarkerConfiguration.getConfiguration();
+        config.setDefaultEncoding("UTF-8");
         Template tp = config.getTemplate(template);
         StringWriter stringWriter = new StringWriter();
         BufferedWriter writer = new BufferedWriter(stringWriter);

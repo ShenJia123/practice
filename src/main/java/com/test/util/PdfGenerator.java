@@ -1,25 +1,15 @@
 package com.test.util;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.Pipeline;
-import com.itextpdf.tool.xml.XMLWorker;
-import com.itextpdf.tool.xml.XMLWorkerFontProvider;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
-import com.itextpdf.tool.xml.html.CssAppliersImpl;
-import com.itextpdf.tool.xml.html.Tags;
-import com.itextpdf.tool.xml.net.FileRetrieve;
-import com.itextpdf.tool.xml.net.ReadingProcessor;
-import com.itextpdf.tool.xml.parser.XMLParser;
-import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
-import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
-import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
-import com.itextpdf.tool.xml.pipeline.html.*;
-import org.springframework.util.StringUtils;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.BaseFont;
+import org.w3c.dom.Document;
+import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -28,136 +18,40 @@ import java.nio.charset.StandardCharsets;
  * Description : PdfGenerator<br>
  *
  * @author : sj
- * @date : 2022/3/11
+ * @date : 2022/3/14
  */
 public class PdfGenerator {
 
-    /**
-     * Output a pdf to the specified outputstream
-     *
-     * @param htmlStr the htmlstr
-     * @param out     the specified outputstream
-     * @throws Exception
-     */
-    public static void generate(String htmlStr, OutputStream out)
-            throws Exception {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance()
-                .newDocumentBuilder();
-        org.w3c.dom.Document doc = builder.parse(new ByteArrayInputStream(htmlStr
-                .getBytes()));
-        ITextRenderer renderer = new ITextRenderer();
-        renderer.setDocument(doc, null);
-        renderer.layout();
-        renderer.createPDF(out);
-        out.close();
+    public static void generatePlus(String html, String outputFile) throws ParserConfigurationException, IOException, SAXException, DocumentException {
+        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = documentBuilder.parse(new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
+        ITextRenderer iTextRenderer = new ITextRenderer();
+        iTextRenderer.getFontResolver().addFont("D:\\Sj\\practice\\src\\main\\resources\\static\\font/SIMSUN.TTC", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        iTextRenderer.setDocument(document, outputFile);
+        iTextRenderer.layout();
+        iTextRenderer.createPDF(byteArrayOutputStream);
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+        fileOutputStream.write(bytes);
+        fileOutputStream.flush();
+        fileOutputStream.close();
     }
 
-    public static void generatePlus(String htmlStr, OutputStream out) throws IOException, DocumentException {
+    public static void createPdf(String content, OutputStream out) throws IOException, com.lowagie.text.DocumentException {
+        ITextRenderer render = new ITextRenderer();
 
-        Document document = new Document(PageSize.A4, 30, 30, 30, 30);
-        document.setMargins(30, 30, 30, 30);
-        PdfWriter writer = PdfWriter.getInstance(document, out);
-        document.open();
+        ITextFontResolver fontResolver = render.getFontResolver();
+        fontResolver.addFont("C:/Windows/Fonts/simsun.ttc", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
 
-        // html内容解析
-        HtmlPipelineContext htmlContext = new HtmlPipelineContext(
-                new CssAppliersImpl(new XMLWorkerFontProvider() {
-                    @Override
-                    public Font getFont(String fontname, String encoding,
-                                        float size, final int style) {
-                        if (fontname == null) {
-                            // 操作系统需要有该字体, 没有则需要安装; 当然也可以将字体放到项目中， 再从项目中读取
-                            fontname = "SimSun";
-                        }
-                        return super.getFont(fontname, encoding, size,
-                                style);
-                    }
-                })) {
-            @Override
-            public HtmlPipelineContext clone()
-                    throws CloneNotSupportedException {
-                HtmlPipelineContext context = super.clone();
-                try {
-                    ImageProvider imageProvider = this.getImageProvider();
-                    context.setImageProvider(imageProvider);
-                } catch (NoImageProviderException e) {
-                    e.printStackTrace();
-                }
-                return context;
-            }
-        };
+        // 解析html生成pdf
+        render.setDocumentFromString(content);
 
-        // 图片解析
-        htmlContext.setImageProvider(new AbstractImageProvider() {
-
-            String rootPath = PdfGenerator.class.getResource("/").getPath();
-
-            @Override
-            public String getImageRootPath() {
-                return rootPath;
-            }
-
-            @Override
-            public Image retrieve(String src) {
-                if (StringUtils.isEmpty(src)) {
-                    return null;
-                }
-                try {
-                    Image image = Image.getInstance(new File(rootPath, src).toURI().toString());
-                    // 图片显示位置
-                    image.setAbsolutePosition(400, 400);
-                    if (image != null) {
-                        store(src, image);
-                        return image;
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                return super.retrieve(src);
-            }
-        });
-        htmlContext.setAcceptUnknown(true).autoBookmark(true).setTagFactory(Tags.getHtmlTagProcessorFactory());
-
-        // css解析
-        CSSResolver cssResolver = XMLWorkerHelper.getInstance().getDefaultCssResolver(true);
-        cssResolver.setFileRetrieve(new FileRetrieve() {
-            @Override
-            public void processFromStream(InputStream in,
-                                          ReadingProcessor processor) throws IOException {
-                try (
-                        InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
-                    int i = -1;
-                    while (-1 != (i = reader.read())) {
-                        processor.process(i);
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // 解析href
-            @Override
-            public void processFromHref(String href, ReadingProcessor processor) throws IOException {
-                InputStream is = PdfGenerator.class.getResourceAsStream("/" + href);
-                try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                    int i = -1;
-                    while (-1 != (i = reader.read())) {
-                        processor.process(i);
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        HtmlPipeline htmlPipeline = new HtmlPipeline(htmlContext, new PdfWriterPipeline(document, writer));
-        Pipeline<?> pipeline = new CssResolverPipeline(cssResolver, htmlPipeline);
-        XMLWorker worker = null;
-        worker = new XMLWorker(pipeline, true);
-        XMLParser parser = new XMLParser(true, worker, StandardCharsets.UTF_8);
-        try (InputStream inputStream = new ByteArrayInputStream(htmlStr.getBytes())) {
-            parser.parse(inputStream, StandardCharsets.UTF_8);
-        }
-        document.close();
+        //解决图片相对路径的问题
+        //render.getSharedContext().setBaseURL("");
+        render.layout();
+        render.createPDF(out);
+        render.finishPDF();
     }
+
 }
