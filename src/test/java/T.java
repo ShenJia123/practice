@@ -2,6 +2,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.IdUtil;
 import com.itextpdf.text.pdf.BaseFont;
+import com.test.dto.CreditDetail;
+import com.test.dto.CreditInfo;
 import com.test.util.HtmlGenerator;
 import com.test.util.PdfGenerator;
 import freemarker.template.Configuration;
@@ -13,6 +15,7 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import sun.misc.BASE64Encoder;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -125,4 +128,44 @@ public class T {
         System.out.println(Arrays.toString(aa.split("\\.")));
     }
 
+
+    @Test
+    public void ee() {
+        CreditInfo creditInfo = new CreditInfo();
+        creditInfo.setAccountCode("12312312312312312");
+        creditInfo.setAccountName("湖北壳牌能源有限公司");
+        creditInfo.setAddress("武汉市江汉区中央商务区云霞路85号、187号、淮海路249号泛海国际中心办公A单元12层4、5号");
+        creditInfo.setBillAmount(BigDecimal.ONE);
+        creditInfo.setRptCreditBillId("WHX20210318000001");
+        creditInfo.setBillDate("2022-01-01");
+        creditInfo.setBankAcctFleet("23434563456345");
+        creditInfo.setBankFleet("中国银行武汉中央商务区支行");
+        creditInfo.setCustomerBand(22);
+        creditInfo.setTel("027-83609001");
+        creditInfo.setStreet("新市镇盛饭路19号");
+        creditInfo.setRepaymentTotalAmount(BigDecimal.TEN);
+        creditInfo.setRepaymentDays("123");
+        creditInfo.setRepaymentDate("2021-02-02");
+        creditInfo.setRepaymentAmount(BigDecimal.valueOf(20L));
+        creditInfo.setDeptPostCode("1000004");
+        creditInfo.setPostCode("12312312");
+        creditInfo.setOverdueAmount(BigDecimal.valueOf(200L));
+        creditInfo.setNotOverdueAmount(BigDecimal.valueOf(100L));
+        creditInfo.setLocationName("中国湖北省 荆门市 京山市");
+        creditInfo.setDeptName("湖北壳牌能源有限公司");
+        List<CreditDetail> list = new ArrayList<>();
+        CreditDetail creditDetail = new CreditDetail();
+        creditDetail.setDate("2022-02-11");
+        creditDetail.setSiteName("123");
+        creditDetail.setProductName("asdasd");
+        creditDetail.setProductUnit("asdas");
+        creditDetail.setQuantity(BigDecimal.TEN);
+        creditDetail.setTransAmount(BigDecimal.valueOf(20L));
+        list.add(creditDetail);
+
+        creditInfo.setList(list);
+
+//        RptCreditBill rptCreditBill = new RptCreditBill();
+//        rptCreditBillService.getFileId(creditInfo,rptCreditBill);
+    }
 }
