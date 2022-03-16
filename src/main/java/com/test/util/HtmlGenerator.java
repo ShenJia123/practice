@@ -1,12 +1,9 @@
 package com.test.util;
 
-import com.test.domain.FreemarkerConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -29,7 +26,8 @@ public class HtmlGenerator {
      */
     public static String generate(String template, Map<String, Object> variables, String outputFile)
             throws Exception {
-        Configuration config = FreemarkerConfiguration.getConfiguration();
+        Configuration config = new Configuration();
+        config.setClassForTemplateLoading(HtmlGenerator.class, "/template");
         config.setDefaultEncoding("UTF-8");
         Template tp = config.getTemplate(template);
         StringWriter stringWriter = new StringWriter();

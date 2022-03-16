@@ -54,9 +54,9 @@ public class T {
         variables.put("amount", "aaaa");
         variables.put("currency", "bbbb");
 
-//        String html = HtmlGenerator.generate("expiringNotify.ftl", variables, outputFile);
+        String html = HtmlGenerator.generate("expiringNotify.ftl", variables, outputFile);
 
-        Configuration configuration = new Configuration();
+      /*  Configuration configuration = new Configuration();
         configuration.setClassForTemplateLoading(T.class, "/template");
         configuration.setDefaultEncoding("utf-8");
         Template template = configuration.getTemplate("expiringNotify.ftl", "utf-8");
@@ -84,10 +84,10 @@ public class T {
         resolver.addFont(resourcesDir + "/static/font/SIMSUN.TTC", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
         renderer.layout();
         renderer.createPDF(os);
-        os.close();
+        os.close();*/
 //        PdfGenerator.generatePlus(html, outputFile);
-//        OutputStream outputStream = new FileOutputStream("D:\\QMDownload/test.pdf");
-//        PdfGenerator.createPdf(html, outputStream);
+        OutputStream outputStream = new FileOutputStream("/Users/shenjia/Desktop/未命名文件夹/expiringNotify.pdf");
+        PdfGenerator.createPdf(html, outputStream);
 
 
     }
