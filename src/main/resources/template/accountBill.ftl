@@ -194,7 +194,7 @@
     <p class="left clear" style="border: 1px solid #ababab;margin: 0 1px 0 1px;width: 90%;"></p>
     <div class="left clear" style="width: 90%;">
         <div class="left" style="text-align: right;width: 40%;">总金额</div>
-        <div class="left width" style="text-align: right;">${sumAmount}</div>
+        <div class="left width" style="text-align: right;">${sumAmount!}</div>
     </div>
     <p class="left clear" style="border: 1px solid black;margin: 0 1px 8px 1px;width: 90%;"></p>
 </div>

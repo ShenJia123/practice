@@ -2,20 +2,30 @@ package com.test.util;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.BaseFont;
-import freemarker.cache.FileTemplateLoader;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.Pipeline;
+import com.itextpdf.tool.xml.XMLWorker;
+import com.itextpdf.tool.xml.XMLWorkerFontProvider;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.itextpdf.tool.xml.html.CssAppliersImpl;
+import com.itextpdf.tool.xml.html.Tags;
+import com.itextpdf.tool.xml.net.FileRetrieve;
+import com.itextpdf.tool.xml.net.ReadingProcessor;
+import com.itextpdf.tool.xml.parser.XMLParser;
+import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
+import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
+import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
+import com.itextpdf.tool.xml.pipeline.html.*;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.w3c.dom.Document;
+import lombok.SneakyThrows;
+import org.springframework.util.StringUtils;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -32,23 +42,98 @@ public class PdfGenerator {
 
     private static final String resourcesDir = System.getProperty("user.dir") + "/src/main/resources";
 
-    public static void generatePlus(String html, String outputFile) throws ParserConfigurationException, IOException, SAXException, DocumentException {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = documentBuilder.parse(new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
-        ITextRenderer iTextRenderer = new ITextRenderer();
-        iTextRenderer.getFontResolver().addFont("D:\\Sj\\practice\\src\\main\\resources\\static\\font/SIMSUN.TTC", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        iTextRenderer.setDocument(document, outputFile);
-        iTextRenderer.layout();
-        iTextRenderer.createPDF(byteArrayOutputStream);
-        byte[] bytes = byteArrayOutputStream.toByteArray();
-        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-        fileOutputStream.write(bytes);
-        fileOutputStream.flush();
-        fileOutputStream.close();
+    public static void generatePlus(String htmlStr, OutputStream out) throws DocumentException {
+        com.itextpdf.text.Document document = new Document(PageSize.A4, 30, 30, 30, 30);
+        document.setMargins(30, 30, 30, 30);
+        PdfWriter writer = PdfWriter.getInstance(document, out);
+        document.open();
+
+        // html内容解析
+        HtmlPipelineContext htmlContext = new HtmlPipelineContext(
+                new CssAppliersImpl(new XMLWorkerFontProvider() {
+                    @SneakyThrows
+                    @Override
+                    public Font getFont(String fontname, String encoding,
+                                        float size, final int style) {
+                        try {
+                            BaseFont base = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+                            return new Font(base, size, style);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return super.getFont(fontname, encoding, size, style);
+                    }
+                })) {
+            @Override
+            public HtmlPipelineContext clone()
+                    throws CloneNotSupportedException {
+                HtmlPipelineContext context = super.clone();
+                try {
+                    ImageProvider imageProvider = this.getImageProvider();
+                    context.setImageProvider(imageProvider);
+                } catch (NoImageProviderException e) {
+                    e.printStackTrace();
+                }
+                return context;
+            }
+        };
+
+        // 图片解析
+        htmlContext.setImageProvider(new AbstractImageProvider() {
+
+            @Override
+            public String getImageRootPath() {
+                return null;
+            }
+        });
+        htmlContext.setAcceptUnknown(true).autoBookmark(true).setTagFactory(Tags.getHtmlTagProcessorFactory());
+
+        // css解析
+        CSSResolver cssResolver = XMLWorkerHelper.getInstance().getDefaultCssResolver(true);
+        cssResolver.setFileRetrieve(new FileRetrieve() {
+            @Override
+            public void processFromStream(InputStream in,
+                                          ReadingProcessor processor) throws IOException {
+                try (
+                        InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
+                    int i = -1;
+                    while (-1 != (i = reader.read())) {
+                        processor.process(i);
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // 解析href
+            @Override
+            public void processFromHref(String href, ReadingProcessor processor) throws IOException {
+                InputStream is = PdfGenerator.class.getResourceAsStream("/" + href);
+                try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                    int i = -1;
+                    while (-1 != (i = reader.read())) {
+                        processor.process(i);
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        HtmlPipeline htmlPipeline = new HtmlPipeline(htmlContext, new PdfWriterPipeline(document, writer));
+        Pipeline<?> pipeline = new CssResolverPipeline(cssResolver, htmlPipeline);
+        XMLWorker worker = null;
+        worker = new XMLWorker(pipeline, true);
+        XMLParser parser = new XMLParser(true, worker, StandardCharsets.UTF_8);
+        try (InputStream inputStream = new ByteArrayInputStream(htmlStr.getBytes())) {
+            parser.parse(inputStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        document.close();
     }
 
-    public static void createPdf(String content, OutputStream out) throws IOException, com.lowagie.text.DocumentException {
+   /* public static void createPdf(String content, OutputStream out) throws IOException, com.lowagie.text.DocumentException {
         ITextRenderer render = new ITextRenderer();
 
         ITextFontResolver fontResolver = render.getFontResolver();
@@ -62,7 +147,7 @@ public class PdfGenerator {
         render.layout();
         render.createPDF(out);
         render.finishPDF();
-    }
+    }*/
 
 
     /**

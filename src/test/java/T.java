@@ -1,18 +1,9 @@
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.resource.ResourceUtil;
-import cn.hutool.core.util.IdUtil;
-import com.itextpdf.text.pdf.BaseFont;
+import com.alibaba.fastjson.JSONObject;
 import com.test.dto.CreditDetail;
 import com.test.dto.CreditInfo;
 import com.test.util.HtmlGenerator;
 import com.test.util.PdfGenerator;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.xhtmlrenderer.pdf.ITextFontResolver;
-import org.xhtmlrenderer.pdf.ITextRenderer;
-import sun.misc.BASE64Encoder;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -57,7 +48,7 @@ public class T {
         variables.put("amount", "aaaa");
         variables.put("currency", "bbbb");
 
-        String html = HtmlGenerator.generate("expiringNotify.ftl", variables, outputFile);
+//        String html = HtmlGenerator.generate("expiringNotify.ftl", variables);
 
       /*  Configuration configuration = new Configuration();
         configuration.setClassForTemplateLoading(T.class, "/template");
@@ -89,8 +80,9 @@ public class T {
         renderer.createPDF(os);
         os.close();*/
 //        PdfGenerator.generatePlus(html, outputFile);
-        OutputStream outputStream = new FileOutputStream("/Users/shenjia/Desktop/未命名文件夹/expiringNotify.pdf");
-        PdfGenerator.createPdf(html, outputStream);
+//        OutputStream outputStream = new FileOutputStream("/Users/shenjia/Desktop/未命名文件夹/expiringNotify.pdf");
+//        PdfGenerator.generatePlus(html, outputStream);
+        PdfGenerator.createPdf(resourcesDir, "expiringNotify.ftl", "/Users/shenjia/Desktop/未命名文件夹/", variables);
 
 
     }
@@ -102,35 +94,9 @@ public class T {
         System.out.println(File.pathSeparatorChar);
     }
 
-    @Test
-    public void cc() throws IOException {
-        String imgUrl = "/Users/shenjia/Sj/pro/practice/src/main/resources/static/apple-touch-icon-120x120.png";
-//        String imgUrl = new ClassPathResource("classpath:/static/apple-touch-icon-120x120.png").getFile();
-        InputStream inputStream = null;
-        byte[] data = null;
-        try {
-            inputStream = new FileInputStream(imgUrl);
-            data = new byte[inputStream.available()];
-            inputStream.read(data);
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        BASE64Encoder base64Encoder = new BASE64Encoder();
-
-        System.out.println(base64Encoder.encode(data));
-    }
-
 
     @Test
-    public void dd() {
-        String aa = "/Users/shenjia/Sj/pro/practice/src/main/resources/static/apple-touch-icon-120x120.png";
-        System.out.println(Arrays.toString(aa.split("\\.")));
-    }
-
-
-    @Test
-    public void ee() {
+    public void ee() throws Exception {
         CreditInfo creditInfo = new CreditInfo();
         creditInfo.setAccountCode("12312312312312312");
         creditInfo.setAccountName("湖北壳牌能源有限公司");
@@ -164,6 +130,13 @@ public class T {
         list.add(creditDetail);
 
         creditInfo.setList(list);
+
+        Map map = JSONObject.parseObject(JSONObject.toJSONString(creditInfo), Map.class);
+//        String html = HtmlGenerator.generate("accountBill.ftl", map);
+//        OutputStream outputStream = new FileOutputStream("/Users/shenjia/Desktop/未命名文件夹/accountBill.pdf");
+//        PdfGenerator.generatePlus(html, outputStream);
+        PdfGenerator.createPdf(resourcesDir, "accountBill.ftl", "/Users/shenjia/Desktop/未命名文件夹/", map);
+
 
 //        RptCreditBill rptCreditBill = new RptCreditBill();
 //        rptCreditBillService.getFileId(creditInfo,rptCreditBill);

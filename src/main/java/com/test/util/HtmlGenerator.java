@@ -24,7 +24,7 @@ public class HtmlGenerator {
      * @return htmlStr
      * @throws Exception
      */
-    public static String generate(String template, Map<String, Object> variables, String outputFile)
+    public static String generate(String template, Map<String, Object> variables)
             throws Exception {
         Configuration config = new Configuration();
         config.setClassForTemplateLoading(HtmlGenerator.class, "/template");
