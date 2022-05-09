@@ -52,35 +52,38 @@
     </style>
 </head>
 <body>
-<div class="left div1" style="margin-top: 10%;">
+<img src="https://b2bvirtualcard.blob.core.chinacloudapi.cn/picturecard/28e60cff84a35372fe15ec3dcc6a4da3.jpg"
+     style="width: 7%;;" class="left"/>
+<div class="left div1 clear" style="margin-top: 10%;">
+    <div style="font-weight: 700;">${customer.postCode!}</div>
     <div>${customer.customerName!}</div>
-    <div>${customer.contactAddress!}</div>
+    <div style="width: 300px;word-wrap: break-word; word-break: normal;">${customer.contactAddress!}</div>
     <div>${customer.address!}</div>
     <div>
         <div class="left">统一社会信用代码</div>
-        <div class="left ml1">${customer.registerNumber!}</div>
+        <div class="left ml1" style="font-weight: 700;">${customer.registerNumber!}</div>
     </div>
 
 </div>
 <div class="right div1" style="margin-top: 5%;">
-    <div>${dept.deptName!}</div>
+    <div style="font-weight: 700;">${dept.deptName!}</div>
     <div>${dept.address!}</div>
     <div>${dept.tel!}</div>
     <!--  <div class="left" style="width: 100%;">
           <div class="left">统一社会信用代码</div>
           <div class="left" style="margin-left: 5%">91441900684487322B</div>
       </div>-->
-    <div class="left">如有任何疑问，请联系壳牌客服</div>
+    <div class="left" style="font-weight: 700;">如有任何疑问，请联系壳牌客服</div>
 
     <div class="left div2">
-        <div>请参考以下信息付款</div>
+        <div style="font-weight: 700;">请参考以下信息付款</div>
         <div>
-            <div class="left">客户编码</div>
-            <div class="right">${customerCode!}</div>
+            <div class="left" style="font-weight: 700;">客户编码</div>
+            <div class="right" style="font-weight: 700;">${accountCode!}</div>
         </div>
         <div class="clear">
-            <div class="left">月结单编码</div>
-            <div class="right">${billId!}</div>
+            <div class="left" style="font-weight: 700;">结单编码</div>
+            <div class="right" style="font-weight: 700;">${billId!}</div>
         </div>
     </div>
 </div>
@@ -90,16 +93,14 @@
         <div class="left" style="line-height: 35px;">${title!}</div>
     </div>
     <div class="left clear">
-        <p>尊敬的客户，</p>
-        <p>我们注意到截至${now}，贵公司的账户中有如下表所列的逾期账款未付。</p>
-        <p>请您核对您的客户编码、账单号和未付款金额等信息后尽快安排付款。</p>
-        <p>如果贵公司对本通知书或者付款信息有任何疑问,请与我公司联系。</p>
+        <div>尊敬的客户，</div>
+        <div style="width: 550px;line-height:30px;word-wrap: break-word; word-break: normal;">${content!}</div>
     </div>
 </div>
 <p class="left" style="border: 1px solid black;width: 100%;margin: 8px 1px 0 1px"></p>
 <div class="left width1" style="width: 100%;">
-    <div class="left" style="width: 20%;text-align: center;">月结单编号</div>
-    <div class="left" style="width: 20%;text-align: center;">月结单日期</div>
+    <div class="left" style="width: 20%;text-align: center;">结单编号</div>
+    <div class="left" style="width: 20%;text-align: center;">结单日期</div>
     <div class="left" style="width: 20%;text-align: center;">到期还款日</div>
     <div class="left" style="width: 20%;text-align: center;">金额</div>
     <div class="left" style="width: 20%;text-align: center;">币种</div>

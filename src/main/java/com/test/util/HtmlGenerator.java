@@ -1,9 +1,11 @@
 package com.test.util;
 
+import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -12,30 +14,32 @@ import java.util.Map;
  * Description : HtmlGenerator<br>
  *
  * @author : sj
- * @date : 2022/3/11
+ * @date : 2022/4/30
  */
 public class HtmlGenerator {
 
     /**
      * Generate html string.
      *
-     * @param template  the name of freemarker template.
-     * @param variables the data of template.
+     * @param templatePath the path of template
+     * @param templateName the name of freemarker template.
+     * @param variables    the data of template.
      * @return htmlStr
      * @throws Exception
      */
-    public static String generate(String template, Map<String, Object> variables)
+    public static String generate(String templatePath, String templateName, Map<String, Object> variables)
             throws Exception {
         Configuration config = new Configuration();
-        config.setClassForTemplateLoading(HtmlGenerator.class, "/template");
-        config.setDefaultEncoding("UTF-8");
-        Template tp = config.getTemplate(template);
+        FileTemplateLoader fileTemplateLoader = new FileTemplateLoader(new File(templatePath));
+        config.setTemplateLoader(fileTemplateLoader);
+        Template template = config.getTemplate(templateName, "utf-8");
         StringWriter stringWriter = new StringWriter();
         BufferedWriter writer = new BufferedWriter(stringWriter);
-        tp.setEncoding("UTF-8");
-        tp.process(variables, writer);
+        template.setEncoding("UTF-8");
+        template.process(variables, writer);
+        String htmlStr = stringWriter.toString();
         writer.flush();
         writer.close();
-        return stringWriter.toString();
+        return htmlStr;
     }
 }
