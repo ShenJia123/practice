@@ -60,8 +60,5 @@ public class CreditInfo {
     //临时变量（和报告文件无关） 需要还的真实金额（可能为负数）
     private BigDecimal repaymentAmount;
 
-    //本期账单详情
-    List<CreditDetail> list;
-
 
 }

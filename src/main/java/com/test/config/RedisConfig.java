@@ -1,3 +1,4 @@
+/*
 package com.test.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+*/
 /**
  * ClassName : RedisConfig<br>
  * Description : redis配置<br>
@@ -19,7 +21,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @author : sj
  * @version : 1.0.0
  * @date : 2021/6/8
- */
+ *//*
+
 @Configuration
 public class RedisConfig {
 
@@ -50,3 +53,4 @@ public class RedisConfig {
         return redisTemplate;
     }
 }
+*/
